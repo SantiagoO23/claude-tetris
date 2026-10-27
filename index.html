@@ -7,7 +7,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1 class="title">TETRIS</h1>
+  <header class="header">
+    <h1 class="title">TETRIS</h1>
+    <button id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Modo claro">
+      <span class="track"><span class="thumb"></span></span>
+      <span id="theme-label">Modo claro</span>
+    </button>
+  </header>
   <div class="wrapper">
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>
