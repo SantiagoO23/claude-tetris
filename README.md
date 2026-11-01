@@ -17,6 +17,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
     - [Opción 1: abrir el archivo directamente](#opción-1-abrir-el-archivo-directamente)
     - [Opción 2: servidor local (recomendado)](#opción-2-servidor-local-recomendado)
   - [Controles](#controles)
+  - [Piezas especiales](#piezas-especiales)
   - [Cómo funciona](#cómo-funciona)
     - [1. `index.html`](#1-indexhtml)
     - [2. `style.css`](#2-stylecss)
@@ -42,6 +43,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Piezas especiales** (bloque 1×1) cada 5 líneas: Bomba, Rayo, Tinte, Gravedad y Congelar (ver [Piezas especiales](#piezas-especiales)).
 - **Modo claro / oscuro**: switch junto al título; inicia en oscuro y la preferencia se guarda en `localStorage`.
 
 ---
@@ -89,6 +91,22 @@ Después abre `http://localhost:8000` en el navegador.
 
 ---
 
+## Piezas especiales
+
+Cada 5 líneas, la siguiente pieza es un bloque 1×1 especial de tipo aleatorio. Su efecto se aplica al fijarse:
+
+| Pieza    | Efecto                                                                      |
+| -------- | --------------------------------------------------------------------------- |
+| Bomba    | Destruye un área 3×3 centrada en el bloque                                  |
+| Rayo     | Limpia la fila y la columna completas donde cae                             |
+| Tinte    | Convierte todos los bloques del color del bloque de abajo en comodines      |
+| Gravedad | Compacta los huecos de cada columna                                         |
+| Congelar | La pieza deja de caer sola durante 5 s (soft/hard drop siguen funcionando)  |
+
+Los **comodines** se dibujan en arcoíris y suman **+50 puntos** cada uno al completar una línea.
+
+---
+
 ## Cómo funciona
 
 El juego se compone de tres archivos que cooperan:
@@ -115,7 +133,7 @@ Contiene toda la lógica del juego. A grandes rasgos:
 - **Wall kicks** (`tryRotate`): si la rotación choca, intenta desplazar la pieza ±1 y ±2 columnas antes de descartar el giro.
 - **Game loop** (`loop`): basado en `requestAnimationFrame`, acumula el tiempo transcurrido y baja la pieza una fila cuando se supera `dropInterval`.
 - **Limpieza de líneas** (`clearLines`): recorre el tablero de abajo hacia arriba; cada fila completa se elimina y se inserta una vacía en la cima.
-- **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual; el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila.
+- **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual; el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila; cada comodín en una línea completada suma 50.
 - **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
 - **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
 

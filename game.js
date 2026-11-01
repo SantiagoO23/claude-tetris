@@ -13,7 +13,26 @@ const COLORS = [
   '#e57373', // Z - red
   '#90caf9', // J - azul pálido
   '#ffb74d', // L - orange
+  '#ffffff', // 8 - comodín (se dibuja arcoíris)
+  '#ff7043', // 9 - bomba
+  '#fff176', // 10 - rayo
+  '#f06292', // 11 - tinte
+  '#a1887f', // 12 - gravedad
+  '#80deea', // 13 - congelar
 ];
+
+// Piezas especiales (bloque 1x1) y comodín
+const COMODIN = 8;
+const SPECIALS = {
+  9:  { name: 'Bomba',    icon: '💣' },
+  10: { name: 'Rayo',     icon: '⚡' },
+  11: { name: 'Tinte',    icon: '🎨' },
+  12: { name: 'Gravedad', icon: '⬇' },
+  13: { name: 'Congelar', icon: '❄' },
+};
+const SPECIAL_EVERY = 5;
+const FREEZE_MS = 5000;
+const COMODIN_BONUS = 50;
 
 const PIECES = [
   null,
@@ -41,11 +60,13 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 const themeLabel = document.getElementById('theme-label');
+const effectEl = document.getElementById('effect');
 
 const THEME_KEY = 'tetris-theme';
 let gridColor = '#22222e';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let nextSpecialAt, pendingSpecial, freezeLeft, lastEffect;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -55,6 +76,11 @@ function randomPiece() {
   const type = Math.floor(Math.random() * 7) + 1;
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
+}
+
+function randomSpecial() {
+  const type = 9 + Math.floor(Math.random() * 5);
+  return { type, shape: [[type]], special: true, x: Math.floor(COLS / 2), y: 0 };
 }
 
 function collide(shape, ox, oy) {
@@ -102,6 +128,7 @@ function clearLines() {
   let cleared = 0;
   for (let r = ROWS - 1; r >= 0; r--) {
     if (board[r].every(v => v !== 0)) {
+      score += board[r].filter(v => v === COMODIN).length * COMODIN_BONUS;
       board.splice(r, 1);
       board.unshift(new Array(COLS).fill(0));
       cleared++;
@@ -113,8 +140,47 @@ function clearLines() {
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    while (lines >= nextSpecialAt) {
+      pendingSpecial = true;
+      nextSpecialAt += SPECIAL_EVERY;
+    }
     updateHUD();
   }
+}
+
+// Efectos de las piezas especiales; (x, y) = celda donde se fijó
+function applySpecial(type, x, y) {
+  lastEffect = SPECIALS[type].name;
+  switch (type) {
+    case 9: // Bomba: área 3x3
+      for (let r = y - 1; r <= y + 1; r++)
+        for (let c = x - 1; c <= x + 1; c++)
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) board[r][c] = 0;
+      break;
+    case 10: // Rayo: fila y columna completas
+      board[y].fill(0);
+      for (let r = 0; r < ROWS; r++) board[r][x] = 0;
+      break;
+    case 11: { // Tinte: color del bloque de abajo pasa a comodín
+      const target = y + 1 < ROWS ? board[y + 1][x] : 0;
+      if (target >= 1 && target <= 7)
+        for (let r = 0; r < ROWS; r++)
+          for (let c = 0; c < COLS; c++)
+            if (board[r][c] === target) board[r][c] = COMODIN;
+      break;
+    }
+    case 12: // Gravedad: compacta huecos por columna
+      for (let c = 0; c < COLS; c++) {
+        const col = [];
+        for (let r = 0; r < ROWS; r++) if (board[r][c]) col.push(board[r][c]);
+        for (let r = ROWS - 1; r >= 0; r--) board[r][c] = col.pop() || 0;
+      }
+      break;
+    case 13: // Congelar: pausa la caída automática
+      freezeLeft = FREEZE_MS;
+      break;
+  }
+  updateHUD();
 }
 
 function ghostY() {
@@ -141,14 +207,16 @@ function softDrop() {
 }
 
 function lockPiece() {
-  merge();
+  if (current.special) applySpecial(current.shape[0][0], current.x, current.y);
+  else merge();
   clearLines();
   spawn();
 }
 
 function spawn() {
   current = next;
-  next = randomPiece();
+  next = pendingSpecial ? randomSpecial() : randomPiece();
+  pendingSpecial = false;
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
@@ -159,17 +227,34 @@ function updateHUD() {
   scoreEl.textContent = score.toLocaleString();
   linesEl.textContent = lines;
   levelEl.textContent = level;
+  if (freezeLeft > 0) effectEl.textContent = `❄ Congelado ${Math.ceil(freezeLeft / 1000)}s`;
+  else effectEl.textContent = lastEffect || '—';
 }
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
   const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
+  if (colorIndex === COMODIN) {
+    // comodín: degradado arcoíris
+    const g = context.createLinearGradient(x * size, y * size, (x + 1) * size, (y + 1) * size);
+    ['#e57373', '#ffd54f', '#81c784', '#4dd0e1', '#ba68c8'].forEach((c, i, a) => g.addColorStop(i / (a.length - 1), c));
+    context.fillStyle = g;
+  } else {
+    context.fillStyle = color;
+  }
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   // highlight
   context.fillStyle = 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  // icono de pieza especial
+  if (SPECIALS[colorIndex]) {
+    context.fillStyle = '#000';
+    context.font = `${Math.floor(size * 0.6)}px sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(SPECIALS[colorIndex].icon, x * size + size / 2, y * size + size / 2 + 1);
+  }
   context.globalAlpha = 1;
 }
 
@@ -248,7 +333,14 @@ function togglePause() {
 function loop(ts) {
   const dt = ts - lastTime;
   lastTime = ts;
-  dropAccum += dt;
+  if (freezeLeft > 0) {
+    // congelado: no cae solo (el temporizador no corre en pausa porque el loop se detiene)
+    freezeLeft = Math.max(0, freezeLeft - dt);
+    dropAccum = 0;
+    updateHUD();
+  } else {
+    dropAccum += dt;
+  }
   if (dropAccum >= dropInterval) {
     dropAccum = 0;
     if (!collide(current.shape, current.x, current.y + 1)) {
@@ -270,6 +362,10 @@ function init() {
   gameOver = false;
   dropInterval = 1000;
   dropAccum = 0;
+  nextSpecialAt = SPECIAL_EVERY;
+  pendingSpecial = false;
+  freezeLeft = 0;
+  lastEffect = '';
   lastTime = performance.now();
   next = randomPiece();
   spawn();
