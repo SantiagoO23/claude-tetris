@@ -374,6 +374,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target === skinSelect && (e.code === 'Escape' || e.code === 'Enter')) skinSelect.blur(); // devuelve el foco al juego
   if (e.target === themeToggle || e.target === skinSelect) return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
