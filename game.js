@@ -94,6 +94,10 @@ let nextSpecialAt, pendingSpecial, pendingSingle, freezeLeft, lastEffect;
 let startLevel = 1;
 let baseLevel = 1;
 
+function levelFor(totalLines) {
+  return baseLevel + Math.floor(totalLines / 10);
+}
+
 function intervalForLevel(lv) {
   return Math.max(100, 1000 - (lv - 1) * 90);
 }
@@ -175,7 +179,7 @@ function clearLines() {
     if (cleared === 4) pendingSingle = true; // recompensa tras un Tetris
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = baseLevel + Math.floor(lines / 10);
+    level = levelFor(lines);
     dropInterval = intervalForLevel(level);
     while (lines >= nextSpecialAt) {
       pendingSpecial = true;
@@ -415,7 +419,7 @@ function init() {
   score = 0;
   lines = 0;
   baseLevel = startLevel;
-  level = baseLevel;
+  level = levelFor(0);
   paused = false;
   gameOver = false;
   dropInterval = intervalForLevel(level);
@@ -446,6 +450,14 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (e.target === themeToggle) return;
+  // focus trap mínimo: Tab no sale del menú de pausa
+  if (paused && e.code === 'Tab') {
+    const items = [...pauseMenu.querySelectorAll('button, select')].filter(el => el.offsetParent !== null);
+    const first = items[0], last = items[items.length - 1];
+    if (!pauseMenu.contains(e.target) || (e.shiftKey && e.target === first)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+    else if (!e.shiftKey && e.target === last) { e.preventDefault(); first.focus(); }
+    return;
+  }
   // controles del menú de pausa: el teclado nativo (Enter/Espacio/flechas) es suyo
   if (pauseMenu.contains(e.target)) return;
   if (paused || gameOver) return;
