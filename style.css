@@ -245,3 +245,75 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Records ---- */
+.hidden { display: none !important; }
+
+#start-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--accent);
+}
+
+#start-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#start-btn:hover { background: var(--accent-hover); }
+
+.over-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.name-form { display: flex; gap: 6px; }
+
+.name-form input {
+  width: 130px;
+  padding: 6px 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--accent);
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.name-form button,
+.link-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.link-btn { opacity: 0.7; }
+.link-btn:hover, .name-form button:hover { opacity: 1; }
+
+.records {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  color: var(--accent);
+  min-width: 200px;
+}
+
+.records table { width: 100%; border-collapse: collapse; }
+.records th, .records td { padding: 2px 6px; text-align: right; }
+.records th:nth-child(2), .records td:nth-child(2) { text-align: left; }
+.records tr.new { background: var(--accent); color: var(--bg); font-weight: 700; }
+.records .stats { margin-top: 6px; text-align: center; opacity: 0.85; }
+.records .empty { text-align: center; opacity: 0.7; }
