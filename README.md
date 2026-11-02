@@ -46,6 +46,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Pausa** y **Game Over** con opción de reinicio.
 - **Piezas especiales** (bloque 1×1) cada 5 líneas: Bomba, Rayo, Tinte, Gravedad y Congelar (ver [Piezas especiales](#piezas-especiales)).
 - **Piezas no estándar**: pentominós (+, U, Y) y una hueca 3×3 que aparecen ocasionalmente, y un bloque 1×1 de recompensa tras un Tetris (ver [Piezas no estándar](#piezas-no-estándar)).
+- **Skins visuales**: selector junto al tema (Retro, Neon con brillo, Pastel redondeado, Pixel art con textura); cambia sin recargar y se guarda en `localStorage` (`tetris-skin`).
 - **Modo claro / oscuro**: switch junto al título; inicia en oscuro y la preferencia se guarda en `localStorage`.
 
 ---

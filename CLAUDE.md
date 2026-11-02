@@ -18,4 +18,5 @@ Tetris clone: `index.html` + `style.css` + `game.js` (plain HTML5 Canvas, vanill
 - `loop(ts)` accumulates time and drops one row when `dropAccum >= dropInterval`. Interval = `max(100, 1000 - (level-1)*90)` ms; level rises every 10 lines.
 - Rotation: `rotateCW` (transpose + reverse), `tryRotate` applies wall kicks (0, ±1, ±2 columns). Collision via `collide(shape, ox, oy)`; ghost via `ghostY()`.
 - Scoring: `LINE_SCORES` x level; hard drop +2/cell, soft drop +1/row. README documents this; keep both in sync.
+- Skins: `SKINS` {retro, neon, pastel, pixel} cada uno con `colors` (paleta de 18 + null) y `draw(context,px,py,size,paint,color)`. `COLORS` es `let` y `applySkin` lo reemplaza; `drawBlock` despacha al skin (con save/restore), dibuja comodín/iconos. Preferencia en `localStorage` `tetris-skin`; `<select id="skin-select">` (el keydown lo ignora). Neon fuerza canvas negro vía `[data-skin="neon"]` en CSS.
 - Controls (keydown handler): arrows move/soft-drop, Up or X rotates, Space hard-drops, P pauses. Pause and game-over share the `#overlay` element.
