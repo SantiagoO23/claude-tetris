@@ -42,6 +42,9 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Skins**: selector en el encabezado con Retro (por defecto), Neon (fondo negro y glow), Pastel (colores suaves y bordes redondeados) y Pixel art (textura en cada bloque). Cambia sin recargar y se guarda en `localStorage` (`tetris-skin`).
+- **Pantalla de inicio** con botón "Jugar": el juego no arranca hasta pulsarlo.
+- **Tabla de records local** (top 5 con nombre, en `localStorage` clave `tetris-records`): se muestra al inicio y en Game Over, resalta tu puntuación si entra en el top (campo de nombre, Enter confirma), guarda el **mejor combo** (locks consecutivos que limpian líneas) y las **líneas máximas**, y tiene botón "Borrar records".
 - **Modo claro / oscuro**: switch junto al título; inicia en oscuro y la preferencia se guarda en `localStorage`.
 
 ---
