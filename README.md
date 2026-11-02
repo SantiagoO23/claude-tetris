@@ -89,7 +89,11 @@ Después abre `http://localhost:8000` en el navegador.
 | `↑` o `X` | Rotar la pieza en sentido horario |
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
-| `P`       | Pausar / reanudar                 |
+| `P` / `Esc` | Pausar / reanudar (abre el menú de pausa) |
+
+### Menú de pausa
+
+Al pausar aparece un menú con: **Reanudar**, **Reiniciar** (nueva partida sin recargar), **Ver controles** (lista de teclas, se muestra/oculta) y **Nivel inicial** (1–10, se aplica a la *próxima* partida; no altera la actual). Mientras el menú está abierto, los controles del juego están bloqueados. Al reanudar se conserva el acumulador de caída, así que pausar no alarga la caída de la pieza.
 
 ---
 
@@ -133,7 +137,7 @@ Define la estructura visual:
 
 - Un `<canvas id="board">` de **300 × 600** píxeles donde se renderiza el tablero.
 - Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza y la lista de controles.
-- Un overlay para los estados **PAUSA** y **GAME OVER**.
+- Un overlay compartido con dos bloques: `#pause-menu` (menú de pausa) y `#gameover-box` (**GAME OVER**).
 
 ### 2. `style.css`
 
@@ -149,8 +153,8 @@ Contiene toda la lógica del juego. A grandes rasgos:
 - **Wall kicks** (`tryRotate`): si la rotación choca, intenta desplazar la pieza ±1 y ±2 columnas antes de descartar el giro.
 - **Game loop** (`loop`): basado en `requestAnimationFrame`, acumula el tiempo transcurrido y baja la pieza una fila cuando se supera `dropInterval`.
 - **Limpieza de líneas** (`clearLines`): recorre el tablero de abajo hacia arriba; cada fila completa se elimina y se inserta una vacía en la cima.
-- **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual; el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila; cada comodín en una línea completada suma 50.
-- **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
+- **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual (un nivel inicial alto multiplica más desde la primera línea); el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila; cada comodín en una línea completada suma 50.
+- **Nivel y velocidad**: el nivel sube cada 10 líneas a partir del nivel inicial elegido (`level = baseLevel + floor(lines / 10)`); la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos (`intervalForLevel`).
 - **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
 
 ### Flujo del juego
