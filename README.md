@@ -18,6 +18,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
     - [Opción 2: servidor local (recomendado)](#opción-2-servidor-local-recomendado)
   - [Controles](#controles)
   - [Piezas especiales](#piezas-especiales)
+  - [Piezas no estándar](#piezas-no-estándar)
   - [Cómo funciona](#cómo-funciona)
     - [1. `index.html`](#1-indexhtml)
     - [2. `style.css`](#2-stylecss)
@@ -44,6 +45,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
 - **Piezas especiales** (bloque 1×1) cada 5 líneas: Bomba, Rayo, Tinte, Gravedad y Congelar (ver [Piezas especiales](#piezas-especiales)).
+- **Piezas no estándar**: pentominós (+, U, Y) y una hueca 3×3 que aparecen ocasionalmente, y un bloque 1×1 de recompensa tras un Tetris (ver [Piezas no estándar](#piezas-no-estándar)).
 - **Modo claro / oscuro**: switch junto al título; inicia en oscuro y la preferencia se guarda en `localStorage`.
 
 ---
@@ -104,6 +106,20 @@ Cada 5 líneas, la siguiente pieza es un bloque 1×1 especial de tipo aleatorio.
 | Congelar | La pieza deja de caer sola durante 5 s (soft/hard drop siguen funcionando)  |
 
 Los **comodines** se dibujan en arcoíris y suman **+50 puntos** cada uno al completar una línea.
+
+---
+
+## Piezas no estándar
+
+Con un 10 % de probabilidad (`ODD_CHANCE`), la siguiente pieza es una de estas (rotan y se comportan como las normales):
+
+| Pieza  | Forma                      | Nota                                              |
+| ------ | -------------------------- | ------------------------------------------------- |
+| `+`    | Pentominó en cruz          | 5 bloques                                         |
+| `U`    | Pentominó en U             | 5 bloques                                         |
+| `Y`    | Pentominó en Y             | 5 bloques                                         |
+| Hueca  | Anillo 3×3 (8 bloques)     | Reto: deja un hueco central difícil de rellenar   |
+| Single | Bloque 1×1                 | Recompensa: aparece tras limpiar 4 líneas a la vez |
 
 ---
 
@@ -192,7 +208,7 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLS`         | Columnas del tablero                     | `10`                  |
 | `ROWS`         | Filas del tablero                        | `20`                  |
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 7 colores             |
+| `COLORS`       | Paleta de colores por tipo de pieza      | 18 colores (1-7 piezas, 8 comodín, 9-13 especiales, 14-18 no estándar) |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
 

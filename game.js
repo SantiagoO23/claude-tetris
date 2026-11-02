@@ -19,6 +19,11 @@ const COLORS = [
   '#f06292', // 11 - tinte
   '#a1887f', // 12 - gravedad
   '#80deea', // 13 - congelar
+  '#ff8a65', // 14 - pentominó +
+  '#4db6ac', // 15 - pentominó U
+  '#aed581', // 16 - pentominó Y
+  '#fff59d', // 17 - single 1x1 (recompensa)
+  '#b39ddb', // 18 - hueca 3x3 (reto)
 ];
 
 // Piezas especiales (bloque 1x1) y comodín
@@ -45,6 +50,17 @@ const PIECES = [
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
 ];
 
+// Piezas no estándar (índices 14-18): pentominós, single y hueca
+PIECES[14] = [[0,14,0],[14,14,14],[0,14,0]];                    // +
+PIECES[15] = [[15,0,15],[15,15,15],[0,0,0]];                    // U
+PIECES[16] = [[0,0,0,0],[16,16,16,16],[0,16,0,0],[0,0,0,0]];   // Y
+PIECES[17] = [[17]];                                             // single 1x1
+PIECES[18] = [[18,18,18],[18,0,18],[18,18,18]];                 // hueca 3x3
+
+const ODD_PIECES = [14, 15, 16, 18];
+const SINGLE = 17;
+const ODD_CHANCE = 0.1;
+
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
 const canvas = document.getElementById('board');
@@ -66,14 +82,20 @@ const THEME_KEY = 'tetris-theme';
 let gridColor = '#22222e';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
-let nextSpecialAt, pendingSpecial, freezeLeft, lastEffect;
+let nextSpecialAt, pendingSpecial, pendingSingle, freezeLeft, lastEffect;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 }
 
 function randomPiece() {
-  const type = Math.floor(Math.random() * 7) + 1;
+  const type = Math.random() < ODD_CHANCE
+    ? ODD_PIECES[Math.floor(Math.random() * ODD_PIECES.length)]
+    : Math.floor(Math.random() * 7) + 1;
+  return makePiece(type);
+}
+
+function makePiece(type) {
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
@@ -136,6 +158,7 @@ function clearLines() {
     }
   }
   if (cleared) {
+    if (cleared === 4) pendingSingle = true; // recompensa tras un Tetris
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
@@ -163,7 +186,7 @@ function applySpecial(type, x, y) {
       break;
     case 11: { // Tinte: color del bloque de abajo pasa a comodín
       const target = y + 1 < ROWS ? board[y + 1][x] : 0;
-      if (target >= 1 && target <= 7)
+      if (target && target !== COMODIN && !SPECIALS[target])
         for (let r = 0; r < ROWS; r++)
           for (let c = 0; c < COLS; c++)
             if (board[r][c] === target) board[r][c] = COMODIN;
@@ -215,8 +238,16 @@ function lockPiece() {
 
 function spawn() {
   current = next;
-  next = pendingSpecial ? randomSpecial() : randomPiece();
-  pendingSpecial = false;
+  // prioridad: especial > single de recompensa > aleatoria; solo se consume un flag
+  if (pendingSpecial) {
+    next = randomSpecial();
+    pendingSpecial = false;
+  } else if (pendingSingle) {
+    next = makePiece(SINGLE);
+    pendingSingle = false;
+  } else {
+    next = randomPiece();
+  }
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
@@ -364,6 +395,7 @@ function init() {
   dropAccum = 0;
   nextSpecialAt = SPECIAL_EVERY;
   pendingSpecial = false;
+  pendingSingle = false;
   freezeLeft = 0;
   lastEffect = '';
   lastTime = performance.now();

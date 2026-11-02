@@ -12,6 +12,7 @@ Tetris clone: `index.html` + `style.css` + `game.js` (plain HTML5 Canvas, vanill
 ## Architecture (`game.js`)
 
 - Board is a `ROWS x COLS` (20x10) matrix; cell is `0` or a color index 1-7. `PIECES` and `COLORS` are parallel arrays indexed by that same value (index 0 is `null`). Piece matrices store their own index as cell values.
+- Color indices beyond 7: 8 wildcard, 9-13 special 1x1 pieces (`SPECIALS`), 14-18 non-standard pieces (+, U, Y, single 1x1, hollow 3x3). `ODD_CHANCE` (10%) picks from `ODD_PIECES` in `randomPiece`; a 4-line clear sets `pendingSingle` so `spawn()` queues the single (special pieces take priority).
 - Canvas is 300x600 = `COLS*BLOCK` x `ROWS*BLOCK` (`BLOCK = 30`). Changing any of the three requires editing `<canvas id="board">` in `index.html`. The next-piece preview uses a second canvas, `#next-canvas` (4x4 cells, drawn in `drawNext`).
 - Module-level mutable state (`board, current, next, score, lines, level, paused, gameOver, dropInterval, ...`) is reset by `init()`. Flow: `spawn()` moves `next` to `current`; a spawn that collides calls `endGame()`; `lockPiece()` -> `merge()` -> `clearLines()` -> `spawn()`.
 - `loop(ts)` accumulates time and drops one row when `dropAccum >= dropInterval`. Interval = `max(100, 1000 - (level-1)*90)` ms; level rises every 10 lines.
