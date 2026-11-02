@@ -17,6 +17,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
     - [Opción 1: abrir el archivo directamente](#opción-1-abrir-el-archivo-directamente)
     - [Opción 2: servidor local (recomendado)](#opción-2-servidor-local-recomendado)
   - [Controles](#controles)
+  - [Tabla de records](#tabla-de-records)
   - [Piezas especiales](#piezas-especiales)
   - [Piezas no estándar](#piezas-no-estándar)
   - [Cómo funciona](#cómo-funciona)
@@ -90,6 +91,16 @@ Después abre `http://localhost:8000` en el navegador.
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P`       | Pausar / reanudar                 |
+
+---
+
+## Tabla de records
+
+- Al abrir la página aparece una pantalla de inicio con la tabla de records y el botón **Jugar**; el juego no corre hasta pulsarlo.
+- Se guarda el **top 5** (nombre, puntos, líneas, combo) en `localStorage` bajo la clave `tetris-records`, junto con el **mejor combo** y las **líneas máximas** de todas las partidas.
+- **Combo**: número de bloqueos de pieza consecutivos que limpian al menos una línea; se reinicia cuando un bloqueo no limpia ninguna.
+- Al terminar la partida, si la puntuación entra en el top aparece un campo de nombre (máx. 12 caracteres; `Enter` o **Guardar** confirma) y la entrada se resalta en la tabla. Si se pulsa **Reiniciar** sin confirmar, se guarda como `Anónimo`.
+- **Borrar records** (pantalla de inicio y de game over) pide confirmación. Si `localStorage` está bloqueado o el JSON está corrupto, la tabla simplemente queda vacía.
 
 ---
 
