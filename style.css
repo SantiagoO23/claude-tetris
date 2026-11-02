@@ -110,6 +110,41 @@ body {
   outline-offset: 2px;
 }
 
+/* ---- Selector de skin ---- */
+.skin-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-2);
+  font-size: 12px;
+}
+
+.skin-picker select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+/* Neon fuerza fondo negro en los canvas (en claro y oscuro) */
+[data-skin="neon"] {
+  --grid: #1a1a2e;
+}
+
+[data-skin="neon"] #board,
+[data-skin="neon"] #next-canvas {
+  background: #000;
+}
+
+/* Pastel en tema claro: fondo algo más oscuro para dar contraste */
+[data-theme="light"][data-skin="pastel"] #board,
+[data-theme="light"][data-skin="pastel"] #next-canvas {
+  background: #cfc9d8;
+}
+
 .wrapper {
   position: relative;
 }
