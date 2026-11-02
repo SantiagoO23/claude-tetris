@@ -369,7 +369,7 @@ function endGame() {
   records.maxCombo = Math.max(records.maxCombo, maxCombo);
   records.maxLines = Math.max(records.maxLines, lines);
   pendingEntry = qualifies(score) ? { name: '', score, lines, combo: maxCombo } : null;
-  if (!pendingEntry) saveRecords();
+  saveRecords();
   nameForm.classList.toggle('hidden', !pendingEntry);
   nameInput.value = '';
   renderRecords(recordsOverEl, -1);
@@ -580,7 +580,7 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', () => {
-  if (pendingEntry) commitEntry(nameInput.value || 'Anónimo');
+  if (pendingEntry) commitEntry(nameInput.value);
   init();
 });
 
